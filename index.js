@@ -3,18 +3,17 @@ const cors = require('cors');
 const app = express();
 const PORT = 3001;
 
-const pingRoute = require('./routes/ping');
+const { router: pingRouter } = require('./routes/ping');
 const checkJwt = require('./middleware/auth');
-
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/scan', require('./routes/scan'));
-app.use('/api/ping', require('./routes/ping'));
-app.use('/api/confirm', require('./routes/confirm'));
+app.use('/api/scan', checkJwt, require('./routes/scan'));
+app.use('/api/ping', pingRouter); // JWT applied only to POST route inside pingRouter
+app.use('/api/confirm', checkJwt, require('./routes/confirm'));
 app.use('/api/user', checkJwt, require('./routes/user'));
 app.use('/api/status', checkJwt, require('./routes/status'));
 

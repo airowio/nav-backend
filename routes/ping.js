@@ -1,37 +1,30 @@
-// File: routes/ping.js
+// routes/ping.js
 const express = require('express');
 const router = express.Router();
+const checkJwt = require('../middleware/auth');
 
-// Temporary in-memory store for active pings
-const activePings = {}; // Format: { recipientId: [{ senderId, timestamp }] }
+const pings = {}; // In-memory storage
 
-// POST /api/ping - Send a ping to another user
-router.post('/', (req, res) => {
+// Send a ping (🔒 Protected route)
+router.post('/', checkJwt, (req, res) => {
   const { senderId, recipientId } = req.body;
   if (!senderId || !recipientId) {
-    return res.status(400).json({ success: false, message: 'Missing senderId or recipientId' });
+    return res.status(400).json({ success: false, message: 'Missing fields' });
   }
 
-  const timestamp = new Date().toISOString();
+  if (!pings[recipientId]) pings[recipientId] = [];
+  pings[recipientId].push({
+    senderId,
+    timestamp: new Date().toISOString()
+  });
 
-  if (!activePings[recipientId]) {
-    activePings[recipientId] = [];
-  }
-
-  activePings[recipientId].push({ senderId, timestamp });
-
-  return res.status(200).json({ success: true, message: 'Ping sent', recipientId, senderId });
+  res.json({ success: true, message: 'Ping sent', recipientId, senderId });
 });
 
-// GET /api/ping/:userId - Retrieve incoming pings for a user
+// Get pings for a user (🔓 Public or optional auth later)
 router.get('/:userId', (req, res) => {
   const { userId } = req.params;
-
-  const pings = activePings[userId] || [];
-  // Optionally clear them after fetch (simulate real-time behavior)
-  delete activePings[userId];
-
-  return res.status(200).json({ success: true, pings });
+  res.json({ success: true, pings: pings[userId] || [] });
 });
 
-module.exports = router;
+module.exports = { router, pings };
