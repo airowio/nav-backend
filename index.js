@@ -14,7 +14,7 @@ app.use('/api/scan', require('./routes/scan'));
 app.use('/api/ping', require('./routes/ping'));
 app.use('/api/confirm', require('./routes/confirm'));
 app.use('/api/user', require('./routes/user'));
-//app.use('/api/status', require('./routes/status'));
+app.use('/api/status', require('./routes/status'));
 
 app.get('/', (req, res) => {
   res.send('Airow backend is live!');
