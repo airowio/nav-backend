@@ -7,6 +7,10 @@ const redis = require('../utils/redis');
 router.post('/', async (req, res) => {
   console.log('Full request auth:', req.auth);
   console.log('Auth payload:', req.auth?.payload);
+  console.log('PING ATTEMPT', {
+    senderEmail: req.auth?.payload?.email,
+    recipientEmail: req.body?.recipientEmail
+  });
 
   const senderEmail = req.auth?.payload?.email;
   const { recipientEmail } = req.body;
