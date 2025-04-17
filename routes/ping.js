@@ -5,7 +5,8 @@ const redis = require('../utils/redis');
 
 // Send a ping (🔒 Protected route)
 router.post('/', async (req, res) => {
-  console.log('Auth payload:', req.auth);
+  console.log('Full request auth:', req.auth);
+  console.log('Auth payload:', req.auth?.payload);
 
   const senderEmail = req.auth?.payload?.email;
   const { recipientEmail } = req.body;
@@ -33,7 +34,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get pings for a user
+// Get pings for a user (🔒 Protected route)
 router.get('/:userId', async (req, res) => {
   const { userId } = req.params;
 
