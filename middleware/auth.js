@@ -1,5 +1,5 @@
 // middleware/auth.js
-const { expressjwt: jwt } = require("express-jwt");
+const { expressjwt } = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
 
 // Replace with your actual Auth0 domain and API identifier
@@ -8,7 +8,7 @@ const authConfig = {
   audience: "https://nav.airow.io/api",
 };
 
-const checkJwt = jwt({
+const checkJwt = expressjwt({
   secret: jwksRsa.expressJwtSecret({
     cache: true,
     rateLimit: true,
@@ -18,6 +18,7 @@ const checkJwt = jwt({
   audience: authConfig.audience,
   issuer: `https://${authConfig.domain}/`,
   algorithms: ["RS256"],
+  requestProperty: 'auth'
 });
 
 module.exports = checkJwt;
