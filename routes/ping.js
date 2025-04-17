@@ -5,11 +5,7 @@ const redis = require('../utils/redis');
 
 // Send a ping (🔒 Protected route)
 router.post('/', async (req, res) => {
-  console.log('Full request auth:', req.auth);
-  console.log('PING ATTEMPT', {
-    senderEmail: req.auth?.email,
-    recipientEmail: req.body?.recipientEmail
-  });
+  console.log("Auth payload:", req.auth);
 
   const senderEmail = req.auth?.email;
   const { recipientEmail } = req.body;

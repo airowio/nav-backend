@@ -18,7 +18,7 @@ const checkJwt = expressjwt({
   audience: authConfig.audience,
   issuer: `https://${authConfig.domain}/`,
   algorithms: ["RS256"],
-  requestProperty: 'auth'
+  requestProperty: "auth"
 });
 
 module.exports = checkJwt;
