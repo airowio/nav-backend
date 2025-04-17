@@ -5,16 +5,15 @@ const checkJwt = require('../middleware/auth');
 // Initialize Redis client
 const redis = require('../utils/redis');
 
-
-
-
 // Send a ping (🔒 Protected route)
 router.post('/', checkJwt, async (req, res) => {
-  const { recipientId } = req.body;
-  const senderEmail = req.auth.payload.email;
+  console.log('Auth payload:', req.auth);
 
-  if (!recipientId) {
-    return res.status(400).json({ success: false, message: 'Missing recipient email' });
+  const senderEmail = req.auth?.payload?.email;
+  const { recipientEmail } = req.body;
+
+  if (!senderEmail || !recipientEmail) {
+    return res.status(400).json({ success: false, message: 'Missing sender or recipient email' });
   }
 
   try {
@@ -24,12 +23,12 @@ router.post('/', checkJwt, async (req, res) => {
     };
 
     // Store pings as a Redis list per recipient
-    await redis.lPush(`pings:${recipientId}`, JSON.stringify(pingData));
+    await redis.lPush(`pings:${recipientEmail}`, JSON.stringify(pingData));
 
     // Set TTL to 24 hours for that ping list
-    await redis.expire(`pings:${recipientId}`, 60 * 60 * 24); // 24 hours
+    await redis.expire(`pings:${recipientEmail}`, 60 * 60 * 24); // 24 hours
 
-    res.json({ success: true, message: 'Ping sent', recipientId, senderEmail });
+    res.json({ success: true, message: 'Ping sent', recipientEmail, senderEmail });
   } catch (err) {
     console.error('Redis error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
