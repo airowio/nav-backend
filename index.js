@@ -12,7 +12,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/scan', checkJwt, require('./routes/scan'));
-app.use('/api/ping', pingRouter); // JWT applied only to POST route inside pingRouter
+app.use('/api/ping', checkJwt, pingRouter);  // Apply checkJwt middleware at the router level
 app.use('/api/confirm', checkJwt, require('./routes/confirm'));
 app.use('/api/user', checkJwt, require('./routes/user'));
 app.use('/api/status', checkJwt, require('./routes/status'));

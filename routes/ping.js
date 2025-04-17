@@ -1,12 +1,10 @@
 // routes/ping.js
 const express = require('express');
 const router = express.Router();
-const checkJwt = require('../middleware/auth');
-// Initialize Redis client
 const redis = require('../utils/redis');
 
 // Send a ping (🔒 Protected route)
-router.post('/', checkJwt, async (req, res) => {
+router.post('/', async (req, res) => {
   console.log('Auth payload:', req.auth);
 
   const senderEmail = req.auth?.payload?.email;
