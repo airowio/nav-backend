@@ -10,14 +10,16 @@ const redis = require('../utils/redis');
 
 // Send a ping (🔒 Protected route)
 router.post('/', checkJwt, async (req, res) => {
-  const { senderId, recipientId } = req.body;
-  if (!senderId || !recipientId) {
-    return res.status(400).json({ success: false, message: 'Missing fields' });
+  const { recipientId } = req.body;
+  const senderEmail = req.auth.payload.email;
+
+  if (!recipientId) {
+    return res.status(400).json({ success: false, message: 'Missing recipient email' });
   }
 
   try {
     const pingData = {
-      senderId,
+      senderEmail,
       timestamp: new Date().toISOString()
     };
 
@@ -27,7 +29,7 @@ router.post('/', checkJwt, async (req, res) => {
     // Set TTL to 24 hours for that ping list
     await redis.expire(`pings:${recipientId}`, 60 * 60 * 24); // 24 hours
 
-    res.json({ success: true, message: 'Ping sent', recipientId, senderId });
+    res.json({ success: true, message: 'Ping sent', recipientId, senderEmail });
   } catch (err) {
     console.error('Redis error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });

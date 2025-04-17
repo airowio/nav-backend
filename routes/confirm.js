@@ -7,14 +7,16 @@ const confirmations = new Map();
 
 // POST /api/confirm
 router.post('/', (req, res) => {
-  const { recipientId, senderId, accepted } = req.body;
+  const { recipientId, accepted } = req.body;
+  const senderEmail = req.auth.payload.email;
 
-  if (!recipientId || !senderId || typeof accepted !== 'boolean') {
+  if (!recipientId || typeof accepted !== 'boolean') {
     return res.status(400).json({ success: false, message: 'Missing or invalid parameters' });
   }
 
-  const key = `${recipientId}:${senderId}`;
+  const key = `${recipientId}:${senderEmail}`;
   confirmations.set(key, {
+    senderEmail,
     accepted,
     timestamp: new Date().toISOString()
   });
@@ -23,14 +25,14 @@ router.post('/', (req, res) => {
     success: true,
     message: `Confirmation ${accepted ? 'accepted' : 'declined'}`,
     recipientId,
-    senderId
+    senderEmail
   });
 });
 
-// GET /api/confirm/:recipientId/:senderId
-router.get('/:recipientId/:senderId', (req, res) => {
-  const { recipientId, senderId } = req.params;
-  const key = `${recipientId}:${senderId}`;
+// GET /api/confirm/:recipientId/:senderEmail
+router.get('/:recipientId/:senderEmail', (req, res) => {
+  const { recipientId, senderEmail } = req.params;
+  const key = `${recipientId}:${senderEmail}`;
   const data = confirmations.get(key);
 
   if (!data) {
@@ -43,7 +45,8 @@ router.get('/:recipientId/:senderId', (req, res) => {
   return res.json({
     success: true,
     confirmed: data.accepted,
-    timestamp: data.timestamp
+    timestamp: data.timestamp,
+    senderEmail: data.senderEmail
   });
 });
 

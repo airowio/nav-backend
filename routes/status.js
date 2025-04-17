@@ -6,21 +6,27 @@ const { scans } = require('./scan');
 const { confirmations } = require('./confirm');
 const { sessions } = require('./user');
 
-router.get('/:userId', async (req, res) => {
-  const userId = req.params.userId;
+router.get('/:userEmail', async (req, res) => {
+  const userEmail = req.params.userEmail;
+  const requestingEmail = req.auth.payload.email;
+
+  // Only allow users to fetch their own status
+  if (userEmail !== requestingEmail) {
+    return res.status(403).json({ success: false, message: 'Unauthorized to view this status' });
+  }
 
   try {
     // Get pings from Redis
-    const rawPings = await redis.lRange(`pings:${userId}`, 0, -1);
+    const rawPings = await redis.lRange(`pings:${userEmail}`, 0, -1);
     const pingInbox = rawPings.map(p => JSON.parse(p));
 
-    const session = sessions?.[userId] || null;
-    const scan = scans?.[userId] || null;
+    const session = sessions?.[userEmail] || null;
+    const scan = scans?.[userEmail] || null;
 
     let confirmation = null;
     if (confirmations) {
       const matchingKey = Object.keys(confirmations).find(key =>
-        key.startsWith(`${userId}::`)
+        key.startsWith(`${userEmail}:`)
       );
       if (matchingKey) {
         confirmation = confirmations[matchingKey];
@@ -29,7 +35,7 @@ router.get('/:userId', async (req, res) => {
 
     res.json({
       success: true,
-      userId,
+      userEmail,
       session,
       lastScan: scan,
       pendingPings: pingInbox,
